@@ -9,9 +9,7 @@ class VideoData:
     title: str 
     url: str
 
-archive_file_name = 'archive.txt'
-
-def initialize_archive(file):
+def initialize_archive(file: str):
     file = Path(f'./{file}')
     if not file.exists():
         Path.touch(f'./{file}')
@@ -25,6 +23,7 @@ def download_audio_file(youtube_url:str, file_path:str, skip_archive:bool):
             'key': 'FFmpegExtractAudio',
             'preferredcodec': 'm4a',  
         }],    
+        # 'quiet': True, # uncomment to view messages of download process
         'ignoreerrors': True,
         }
     
@@ -44,7 +43,7 @@ def get_video_data(youtube_url: str) -> list[VideoData]:
     with YoutubeDL(options) as ydl:
         info = ydl.extract_info(youtube_url, download=False)
         if 'entries' in info:
-            # playlist
+            # playlist returns list of videos
             videos = [VideoData(title=entry['title'], url=entry['url']) for entry in info['entries']]
         else:
             # single video
@@ -62,13 +61,14 @@ def main(args):
 
     if not skip_archive:
         initialize_archive(archive_file)
-        
-
+              
     for video_data in video_data_list:
         download_audio_file(video_data.url, file_path, skip_archive)
 
 
 if __name__ == "__main__":
+    archive_file_name = 'archive.txt'
+
     parser = argparse.ArgumentParser(
         prog="Youtube Downloader",
         description="""Downloads a Youtube playlist or video to a folder.
